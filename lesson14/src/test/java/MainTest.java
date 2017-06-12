@@ -5,15 +5,6 @@ import java.util.Arrays;
 
 public class MainTest {
   @Test
-  public void testTotalCalculation() {
-    ShoppingCart cart = new ShoppingCart();
-    cart.addBook("Head First Design Patterns", 35.89);
-    cart.addBook("Head First Java", 27.33);
-
-    assertEquals(35.89 + 27.33, cart.total, 0.01);
-  } 
-
-  @Test
   public void cartAPI() {
     ShoppingCart cart = new ShoppingCart();
     cart.addBook("Head First Design Patterns", 35.89);
@@ -27,12 +18,47 @@ public class MainTest {
   }
 
   @Test 
+  public void cartPayMethod_shouldCall_paymentStrategyPayMethod() {
+    ShoppingCart cart = new ShoppingCart();
+
+    /*final*/ boolean finalVar = true;
+    final boolean[] callAttempt = {false};
+    cart.pay(new PaymentStrategy() {
+      public void pay(double total) {
+        // this has to be called once
+        callAttempt[0] = true;
+        
+        System.out.println(finalVar);
+      }
+    });
+    
+    assertEquals(true, callAttempt[0]);
+  }
+
+  @Test
+  public void testTotalCalculation() {
+    ShoppingCart cart = new ShoppingCart();
+    cart.addBook("Head First Design Patterns", 35.89);
+    cart.addBook("Head First Java", 27.33);
+
+    double[] totalData = {0.0};
+    cart.pay(new PaymentStrategy() {
+      public void pay(double total) {
+        totalData[0] = total;
+      }
+    });
+
+    assertEquals(35.89 + 27.33, totalData[0], 0.01);
+  } 
+
+  @Test 
   public void paymentWithPayPal_example() {
     ShoppingCart cart = new ShoppingCart();
       cart.addBook("Head First Design Patterns", 35.89);
       cart.addBook("Head First Java", 27.33);
 
-      cart.pay(new PayPalPaymentStrategy("buyer@example.com", "12345"));
+      cart.pay(new PayPalPaymentStrategy(
+        "buyer@example.com", "12345"));
   }
 
   @Test 
@@ -41,12 +67,13 @@ public class MainTest {
       cart.addBook("Head First Design Patterns", 35.89);
       cart.addBook("Head First Java", 27.33);
 
-      cart.pay(new CreditCardPaymentStrategy("1234567890987654", "12/12", "000"));
+      cart.pay(new CreditCardPaymentStrategy(
+        "1234567890987654", "12/12", "000"));
   }
 }
 
 class ShoppingCart {
-  double total;
+  private double total;
 
   public void addBook(String title, double price) {
     total += price;
