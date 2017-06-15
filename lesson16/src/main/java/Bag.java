@@ -1,8 +1,8 @@
-public class Bag {
+public class Bag<Item> {
   private Node firstNode; 
   private int size = 0;
-
-  public void add(int item) {
+  
+  public void add(Item item) {
     if (firstNode == null) {
       firstNode = new Node(item);
     } else {
@@ -34,12 +34,34 @@ public class Bag {
     return size() == 0;
   }
 
+  private Node currentElement;
+  private boolean finished = false;
+  
+  public Item next() {
+    
+    Item value = currentElement.value;
+    currentElement = currentElement.next;
+
+    if (currentElement == null) {
+      finished = true;
+    }
+
+    return value;
+  }
+
+  public boolean hasNext() {
+    if (currentElement == null && finished == false) {
+      currentElement = firstNode;
+    }
+    return currentElement != null;
+  }
+
   private class Node {
-    Node(int value) {
+    Node(Item value) {
       this.value = value;
     }
     
-    int value;
+    Item value;
     Node next;
   }
 }
